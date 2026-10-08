@@ -235,21 +235,33 @@ const lightboxImg = document.getElementById("lightboxImg");
 const lightboxCaption = document.getElementById("lightboxCaption");
 const lightboxClose = document.getElementById("lightboxClose");
 
+const reader = document.getElementById("reader");
+const readerContent = document.getElementById("readerContent");
+const readerClose = document.getElementById("readerClose");
+
+let lastFocused = null;
+
+// Bloquea el scroll del cuerpo solo mientras haya una vista abierta
+function syncScrollLock() {
+  document.body.style.overflow = (!reader.hidden || !lightbox.hidden) ? "hidden" : "";
+}
+
 function openLightbox(src, caption) {
   lightboxImg.src = src;
   lightboxImg.alt = caption || "";
   lightboxCaption.textContent = caption || "";
   lightbox.hidden = false;
   lightbox.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
+  syncScrollLock();
   lightboxClose.focus();
 }
 
 function closeLightbox() {
+  if (lightbox.hidden) return;
   lightbox.hidden = true;
   lightbox.setAttribute("aria-hidden", "true");
-  lightboxImg.src = "";
-  document.body.style.overflow = "";
+  lightboxImg.removeAttribute("src");
+  syncScrollLock();
 }
 
 document.addEventListener("error", (e) => {
@@ -269,18 +281,19 @@ document.addEventListener("click", (e) => {
 });
 
 if (lightbox && lightboxClose) {
-  lightboxClose.addEventListener("click", closeLightbox);
+  // La X visible mientras hay una imagen abierta cierra también la lectura
+  lightboxClose.addEventListener("click", () => {
+    if (!reader.hidden) closeReader();
+    else closeLightbox();
+  });
   lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLightbox(); });
 }
 
 // ============================================================
 // Vista de lectura completa del blog
 // ============================================================
-const reader = document.getElementById("reader");
-const readerContent = document.getElementById("readerContent");
-const readerClose = document.getElementById("readerClose");
-
 function openReader(entry) {
+  lastFocused = document.activeElement;
   const date = entry.querySelector(".entry-date");
   const title = entry.querySelector("h3");
   const body = entry.querySelector(".entry-full .blog-body");
@@ -291,15 +304,19 @@ function openReader(entry) {
   reader.classList.toggle("reader--light-text", entry.classList.contains("blog-entry--featured"));
   reader.hidden = false;
   reader.setAttribute("aria-hidden", "false");
-  document.body.style.overflow = "hidden";
   reader.scrollTop = 0;
+  syncScrollLock();
   readerClose.focus();
 }
 
+// Cierra la lectura completa (y el visor de imágenes si está abierto)
 function closeReader() {
+  if (reader.hidden && lightbox.hidden) return;
   reader.hidden = true;
   reader.setAttribute("aria-hidden", "true");
-  document.body.style.overflow = "";
+  closeLightbox();
+  syncScrollLock();
+  if (lastFocused && typeof lastFocused.focus === "function") lastFocused.focus();
 }
 
 if (reader && readerClose) {
@@ -308,10 +325,13 @@ if (reader && readerClose) {
   });
   readerClose.addEventListener("click", closeReader);
   reader.addEventListener("click", (e) => { if (e.target === reader) closeReader(); });
-  document.addEventListener("keydown", (e) => {
-    if (e.key === "Escape" && !reader.hidden) closeReader();
-    if (e.key === "Escape" && lightbox && !lightbox.hidden) closeLightbox();
-  });
 }
+
+// Escape cierra la vista superior: primero el visor de imágenes, luego la lectura
+document.addEventListener("keydown", (e) => {
+  if (e.key !== "Escape") return;
+  if (!lightbox.hidden) { closeLightbox(); return; }
+  if (!reader.hidden) closeReader();
+});
 
 document.getElementById("year").textContent = new Date().getFullYear();
