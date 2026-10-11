@@ -1,6 +1,4 @@
-// ============================================================
-// Cambio de modo oscuro / claro
-// ============================================================
+// Tema oscuro/claro
 (function initTheme() {
   const saved = localStorage.getItem("theme");
   const systemPrefersLight = window.matchMedia("(prefers-color-scheme: light)").matches;
@@ -17,9 +15,7 @@ themeToggle.addEventListener("click", () => {
   updateSimpleIconColors();
 });
 
-// ============================================================
-// Tecnologías (logos SVG vía Devicon CDN / Simple Icons CDN)
-// ============================================================
+// Habilidades
 const DEVICON = "https://cdn.jsdelivr.net/gh/devicons/devicon/icons/";
 const SIMPLEICONS = "https://cdn.simpleicons.org/";
 
@@ -89,9 +85,7 @@ renderTechGrid(document.getElementById("techGrid"), technologies);
 renderTechGrid(document.getElementById("serversGrid"), servers);
 renderTechGrid(document.getElementById("idesGrid"), ides);
 
-// ============================================================
-// Menú móvil y enlace activo según sección visible
-// ============================================================
+// Header
 const menuToggle = document.getElementById("menuToggle");
 const navLinks = document.getElementById("navLinks");
 
@@ -109,26 +103,7 @@ navLinks.querySelectorAll("a").forEach((link) => {
   });
 });
 
-const sections = document.querySelectorAll("main section[id]");
-const sectionObserver = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        const id = entry.target.getAttribute("id");
-        navLinks.querySelectorAll('a[href^="#"]').forEach((link) => {
-          link.classList.toggle("active", link.getAttribute("href") === `#${id}`);
-        });
-      }
-    });
-  },
-  { threshold: 0, rootMargin: "-45% 0px -45% 0px" }
-);
-
-sections.forEach((section) => sectionObserver.observe(section));
-
-// ============================================================
-// Carruseles de imágenes de los proyectos
-// ============================================================
+// Proyectos
 function buildGallery(container) {
   const files = (container.dataset.images || "")
     .split("|")
@@ -176,7 +151,6 @@ function buildGallery(container) {
   const prev = container.querySelector(".gallery-prev");
   const next = container.querySelector(".gallery-next");
   let index = 0;
-  let timer = null;
 
   const go = (i) => {
     index = (i + files.length) % files.length;
@@ -184,32 +158,19 @@ function buildGallery(container) {
     dotEls.forEach((dot, di) => dot.classList.toggle("active", di === index));
   };
 
-  const stopAuto = () => { if (timer) clearInterval(timer); };
-  const startAuto = () => {
-    if (files.length < 2) return;
-    stopAuto();
-    timer = setInterval(() => go(index + 1), 5000);
-  };
-
-  const manual = (i) => { go(i); stopAuto(); startAuto(); };
-  prev.addEventListener("click", () => manual(index - 1));
-  next.addEventListener("click", () => manual(index + 1));
-  dotEls.forEach((dot, di) => dot.addEventListener("click", () => manual(di)));
-  container.addEventListener("mouseenter", stopAuto);
-  container.addEventListener("mouseleave", startAuto);
+  prev.addEventListener("click", () => go(index - 1));
+  next.addEventListener("click", () => go(index + 1));
+  dotEls.forEach((dot, di) => dot.addEventListener("click", () => go(di)));
 
   if (files.length < 2) {
     prev.style.display = "none";
     next.style.display = "none";
   }
-  startAuto();
 }
 
 document.querySelectorAll(".project-gallery").forEach(buildGallery);
 
-// ============================================================
-// Visor ampliado de imágenes del blog
-// ============================================================
+// Blogs
 const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightboxImg");
 const lightboxCaption = document.getElementById("lightboxCaption");
@@ -262,4 +223,5 @@ if (lightbox && lightboxImg && lightboxCaption && lightboxClose) {
   });
 }
 
+// Footer
 document.getElementById("year").textContent = new Date().getFullYear();
