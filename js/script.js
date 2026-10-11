@@ -59,13 +59,13 @@ function renderTechGrid(grid, items) {
     .map((item) => {
       if (item.simpleIcon) {
         return `
-      <div class="tech-card glass reveal">
+      <div class="tech-card glass">
         <img class="tech-icon-img" src="${SIMPLEICONS}${item.simpleIcon}/${accentHex()}" alt="Logo de ${item.name}" loading="lazy" data-slug="${item.simpleIcon}" />
         <span class="tech-name">${item.name}</span>
       </div>`;
       }
       return `
-      <div class="tech-card glass reveal" style="--icon:url('${DEVICON}${item.file}')">
+      <div class="tech-card glass" style="--icon:url('${DEVICON}${item.file}')">
         <span class="tech-icon" role="img" aria-label="Logo de ${item.name}"></span>
         <span class="tech-name">${item.name}</span>
       </div>`;
@@ -88,26 +88,6 @@ function updateSimpleIconColors() {
 renderTechGrid(document.getElementById("techGrid"), technologies);
 renderTechGrid(document.getElementById("serversGrid"), servers);
 renderTechGrid(document.getElementById("idesGrid"), ides);
-
-// ============================================================
-// Animaciones al hacer scroll
-// ============================================================
-const revealObserver = new IntersectionObserver(
-  (entries) => {
-    entries.forEach((entry) => {
-      if (entry.isIntersecting) {
-        entry.target.classList.add("visible");
-        revealObserver.unobserve(entry.target);
-      }
-    });
-  },
-  { threshold: 0.12, rootMargin: "0px 0px -40px 0px" }
-);
-
-document.querySelectorAll(".reveal").forEach((el, index) => {
-  el.style.transitionDelay = `${(index % 6) * 60}ms`;
-  revealObserver.observe(el);
-});
 
 // ============================================================
 // Menú móvil y enlace activo según sección visible

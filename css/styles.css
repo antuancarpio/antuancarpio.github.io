@@ -966,8 +966,13 @@ h1, h2, h3 { color: var(--heading); line-height: 1.2; }
 .entry-link { margin-top: 4px; }
 
 /* Página individual del blog */
-.blog-post { max-width: 900px; }
-.blog-post .back-link { display: inline-flex; margin: 0 0 28px; }
+.blog-post { max-width: 900px; padding-top: 120px; }
+.blog-post .back-link {
+  display: inline-flex;
+  align-items: center;
+  min-height: 44px;
+  margin: 0 0 28px;
+}
 .blog-post-title { font-size: clamp(1.7rem, 4.5vw, 2.4rem); margin: 8px 0 14px; }
 
 .blog-post .blog-body {
@@ -1058,17 +1063,6 @@ h1, h2, h3 { color: var(--heading); line-height: 1.2; }
 .footer-copy { font-size: 0.84rem; color: var(--text-dim); font-family: var(--font-mono); }
 
 /* ============================================================
-   Animaciones al hacer scroll
-   ============================================================ */
-.reveal {
-  opacity: 0;
-  transform: translateY(30px);
-  transition: opacity 0.7s ease, transform 0.7s ease;
-}
-
-.reveal.visible { opacity: 1; transform: translateY(0); }
-
-/* ============================================================
    Responsive
    ============================================================ */
 @media (max-width: 900px) {
@@ -1115,6 +1109,7 @@ h1, h2, h3 { color: var(--heading); line-height: 1.2; }
 
 @media (max-width: 640px) {
   .section { padding: 70px 18px; }
+  .blog-post { padding-top: 120px; }
   .hero { padding-top: 120px; }
   .card, .project-card, .blog-card, .blog-entry, .contact-card { padding: 22px; }
   .edu-card { flex-direction: column; text-align: center; align-items: center; }
@@ -1135,5 +1130,4 @@ h1, h2, h3 { color: var(--heading); line-height: 1.2; }
 @media (prefers-reduced-motion: reduce) {
   html { scroll-behavior: auto; }
   .blob, .hero-logo { animation: none; }
-  .reveal { opacity: 1; transform: none; transition: none; }
 }
