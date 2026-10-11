@@ -228,110 +228,58 @@ function buildGallery(container) {
 document.querySelectorAll(".project-gallery").forEach(buildGallery);
 
 // ============================================================
-// Galería de imágenes del blog (placeholder + visor ampliado)
+// Visor ampliado de imágenes del blog
 // ============================================================
 const lightbox = document.getElementById("lightbox");
 const lightboxImg = document.getElementById("lightboxImg");
 const lightboxCaption = document.getElementById("lightboxCaption");
 const lightboxClose = document.getElementById("lightboxClose");
 
-const reader = document.getElementById("reader");
-const readerContent = document.getElementById("readerContent");
-const readerClose = document.getElementById("readerClose");
-
-let lastFocused = null;
-
-// Bloquea el scroll del cuerpo solo mientras haya una vista abierta
-function syncScrollLock() {
-  document.body.style.overflow = (!reader.hidden || !lightbox.hidden) ? "hidden" : "";
-}
-
-function openLightbox(src, caption) {
-  lightboxImg.src = src;
-  lightboxImg.alt = caption || "";
-  lightboxCaption.textContent = caption || "";
-  lightbox.hidden = false;
-  lightbox.setAttribute("aria-hidden", "false");
-  syncScrollLock();
-  lightboxClose.focus();
-}
-
-function closeLightbox() {
-  if (lightbox.hidden) return;
-  lightbox.hidden = true;
-  lightbox.setAttribute("aria-hidden", "true");
-  lightboxImg.removeAttribute("src");
-  syncScrollLock();
-}
-
-document.addEventListener("error", (e) => {
-  const img = e.target;
-  if (img && img.tagName === "IMG") {
-    const media = img.closest(".blog-media");
-    if (media) media.classList.add("no-img");
+if (lightbox && lightboxImg && lightboxCaption && lightboxClose) {
+  function syncScrollLock() {
+    document.body.style.overflow = lightbox.hidden ? "" : "hidden";
   }
-}, true);
 
-document.addEventListener("click", (e) => {
-  const media = e.target.closest(".blog-media");
-  if (!media || media.classList.contains("no-img")) return;
-  const img = media.querySelector("img");
-  const caption = media.closest(".blog-figure")?.querySelector("figcaption")?.textContent?.trim();
-  openLightbox(media.dataset.full || img?.src || "", caption);
-});
+  function openLightbox(src, caption) {
+    lightboxImg.src = src;
+    lightboxImg.alt = caption || "";
+    lightboxCaption.textContent = caption || "";
+    lightbox.hidden = false;
+    lightbox.setAttribute("aria-hidden", "false");
+    syncScrollLock();
+    lightboxClose.focus();
+  }
 
-if (lightbox && lightboxClose) {
-  // La X visible mientras hay una imagen abierta cierra también la lectura
-  lightboxClose.addEventListener("click", () => {
-    if (!reader.hidden) closeReader();
-    else closeLightbox();
+  function closeLightbox() {
+    if (lightbox.hidden) return;
+    lightbox.hidden = true;
+    lightbox.setAttribute("aria-hidden", "true");
+    lightboxImg.removeAttribute("src");
+    syncScrollLock();
+  }
+
+  document.addEventListener("error", (e) => {
+    const img = e.target;
+    if (img && img.tagName === "IMG") {
+      const media = img.closest(".blog-media");
+      if (media) media.classList.add("no-img");
+    }
+  }, true);
+
+  document.addEventListener("click", (e) => {
+    const media = e.target.closest(".blog-media");
+    if (!media || media.classList.contains("no-img")) return;
+    const img = media.querySelector("img");
+    const caption = media.closest(".blog-figure")?.querySelector("figcaption")?.textContent?.trim();
+    openLightbox(media.dataset.full || img?.src || "", caption);
   });
+
+  lightboxClose.addEventListener("click", closeLightbox);
   lightbox.addEventListener("click", (e) => { if (e.target === lightbox) closeLightbox(); });
-}
 
-// ============================================================
-// Vista de lectura completa del blog
-// ============================================================
-function openReader(entry) {
-  lastFocused = document.activeElement;
-  const date = entry.querySelector(".entry-date");
-  const title = entry.querySelector("h3");
-  const body = entry.querySelector(".entry-full .blog-body");
-  readerContent.innerHTML = `
-    <span class="reader-date">${date ? date.textContent : ""}</span>
-    <h2 class="reader-title">${title ? title.textContent : ""}</h2>
-    ${body ? body.innerHTML : ""}`;
-  reader.classList.toggle("reader--light-text", entry.classList.contains("blog-entry--featured"));
-  reader.hidden = false;
-  reader.setAttribute("aria-hidden", "false");
-  reader.scrollTop = 0;
-  syncScrollLock();
-  readerClose.focus();
-}
-
-// Cierra la lectura completa (y el visor de imágenes si está abierto)
-function closeReader() {
-  if (reader.hidden && lightbox.hidden) return;
-  reader.hidden = true;
-  reader.setAttribute("aria-hidden", "true");
-  closeLightbox();
-  syncScrollLock();
-  if (lastFocused && typeof lastFocused.focus === "function") lastFocused.focus();
-}
-
-if (reader && readerClose) {
-  document.querySelectorAll(".entry-toggle").forEach((btn) => {
-    btn.addEventListener("click", () => openReader(btn.closest(".blog-entry")));
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape" && !lightbox.hidden) closeLightbox();
   });
-  readerClose.addEventListener("click", closeReader);
-  reader.addEventListener("click", (e) => { if (e.target === reader) closeReader(); });
 }
-
-// Escape cierra la vista superior: primero el visor de imágenes, luego la lectura
-document.addEventListener("keydown", (e) => {
-  if (e.key !== "Escape") return;
-  if (!lightbox.hidden) { closeLightbox(); return; }
-  if (!reader.hidden) closeReader();
-});
 
 document.getElementById("year").textContent = new Date().getFullYear();
